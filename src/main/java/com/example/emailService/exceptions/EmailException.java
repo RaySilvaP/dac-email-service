@@ -1,4 +1,4 @@
-package com.example.etapa1DAC.exceptions;
+package com.example.emailService.exceptions;
 
 public class EmailException extends RuntimeException {
     public EmailException(String message) {

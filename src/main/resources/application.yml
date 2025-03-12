@@ -1,21 +1,21 @@
+rabbitmq:
+  queue: email-queue
+  exchange: email-exchange
+  routing key: email-request
+
 spring:
   application:
-    name: etapa1DAC
+    name: emailService
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    listener:
+      simple:
+        prefetch: 1  # Limits messages per consumer to avoid overload
+        acknowledge-mode: manual  # Enables manual acknowledgment
 
-  datasource:
-    url: jdbc:postgresql://localhost:5432/dac
-    username: dac
-    password: dac
-    driver-class-name: org.postgresql.Driver
-
-  jpa:
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
-    show-sql: true
   mail:
     host: smtp.gmail.com
     port: 587

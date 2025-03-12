@@ -1,10 +1,9 @@
-package com.example.etapa1DAC.service;
+package com.example.emailService.service;
 
-import com.example.etapa1DAC.domain.Ticket;
-import com.example.etapa1DAC.domain.User;
-import com.example.etapa1DAC.exceptions.EmailException;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import com.example.emailService.domain.EmailRequest;
+import com.example.emailService.exceptions.EmailException;
 import jakarta.mail.internet.MimeMessage;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -20,21 +19,26 @@ public class EmailService {
 
     @Autowired TemplateEngine templateEngine;
 
+    @RabbitListener(queues = "${rabbitmq.queue}")
+    public void processEmail(EmailRequest request){
+        sendPurchaseConfirmation(request);
+    }
+
     @Async
-    public void sendPurchaseConfirmation(User user, Ticket ticket, double totalPrice) {
+    public void sendPurchaseConfirmation(EmailRequest request) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            helper.setTo(user.getEmail());
-            helper.setSubject("Confirmação de Compra - " + ticket.getEvent().getName());
+            helper.setTo(request.getAddress());
+            helper.setSubject("Confirmação de Compra - " + request.getEventName());
 
             Context context = new Context();
-            context.setVariable("userName", user.getName());
-            context.setVariable("event", ticket.getEvent());
-            context.setVariable("ticketType", ticket.getTicketType().getName());
-            context.setVariable("quantity", ticket.getQuantity());
-            context.setVariable("totalPrice", totalPrice);
+            context.setVariable("userName", request.getUserName());
+            context.setVariable("event", request.getEventName());
+            context.setVariable("ticketType", request.getTicketType());
+            context.setVariable("quantity", request.getQuantity());
+            context.setVariable("totalPrice", request.getTotalPrice());
 
             String htmlContent = templateEngine.process("email/purchase-confirmation", context);
             helper.setText(htmlContent, true);
