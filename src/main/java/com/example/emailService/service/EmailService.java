@@ -1,7 +1,9 @@
 package com.example.emailService.service;
 
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import com.example.emailService.domain.EmailRequest;
+import com.example.emailService.messaging.EmailErrorEvent;
+import com.example.emailService.messaging.EmailRequestProducer;
+import com.example.emailService.messaging.EmailSuccessEvent;
+import com.example.emailService.messaging.PurchaseConfirmationEvent;
 import com.example.emailService.exceptions.EmailException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,33 +21,35 @@ public class EmailService {
 
     @Autowired TemplateEngine templateEngine;
 
-    @RabbitListener(queues = "${rabbitmq.queue}")
-    public void processEmail(EmailRequest request){
-        sendPurchaseConfirmation(request);
-    }
+    @Autowired EmailRequestProducer producer;
 
     @Async
-    public void sendPurchaseConfirmation(EmailRequest request) {
+    public void sendPurchaseConfirmation(PurchaseConfirmationEvent purchase) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            helper.setTo(request.getAddress());
-            helper.setSubject("Confirmação de Compra - " + request.getEventName());
+            helper.setTo(purchase.emailAddress());
+            helper.setSubject("Confirmação de Compra - " + purchase.eventName());
 
             Context context = new Context();
-            context.setVariable("userName", request.getUserName());
-            context.setVariable("event", request.getEventName());
-            context.setVariable("ticketType", request.getTicketType());
-            context.setVariable("quantity", request.getQuantity());
-            context.setVariable("totalPrice", request.getTotalPrice());
+            context.setVariable("userName", purchase.userName());
+            context.setVariable("event", purchase.eventName());
+            context.setVariable("ticketType", purchase.ticketType());
+            context.setVariable("quantity", purchase.quantity());
+            context.setVariable("totalPrice", purchase.totalPrice());
 
             String htmlContent = templateEngine.process("email/purchase-confirmation", context);
             helper.setText(htmlContent, true);
 
             mailSender.send(message);
+            EmailSuccessEvent event = new EmailSuccessEvent(purchase.emailAddress());
+            producer.registerSuccessEmail(event);
         } catch (Exception e) {
-            throw new EmailException("Falha ao enviar e-mail: " + e.getMessage());
+            EmailException exception = new EmailException("Falha ao enviar e-mail: " + e.getMessage());
+            EmailErrorEvent event = new EmailErrorEvent(purchase.emailAddress(), exception.getMessage());
+            producer.registerErrorEmail(event);
+            throw exception;
         }
     }
 }

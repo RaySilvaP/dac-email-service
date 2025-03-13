@@ -1,20 +1,22 @@
 rabbitmq:
-  queue: email-queue
+  queue: email-request-queue
+  error-queue: email-response-error-queue
+  success-queue: email-response-success-queue
   exchange: email-exchange
-  routing key: email-request
+  routing-key:
+    response-error: email-response-error
+    response-success: email-response-success
+
 
 spring:
   application:
     name: emailService
+
   rabbitmq:
     host: localhost
     port: 5672
-    username: guest
-    password: guest
-    listener:
-      simple:
-        prefetch: 1  # Limits messages per consumer to avoid overload
-        acknowledge-mode: manual  # Enables manual acknowledgment
+    username: dac
+    password: dac
 
   mail:
     host: smtp.gmail.com
