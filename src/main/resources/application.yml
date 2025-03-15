@@ -1,22 +1,9 @@
-rabbitmq:
-  queue: email-request-queue
-  error-queue: email-response-error-queue
-  success-queue: email-response-success-queue
-  exchange: email-exchange
-  routing-key:
-    response-error: email-response-error
-    response-success: email-response-success
-
+server:
+  port: 8081
 
 spring:
   application:
     name: emailService
-
-  rabbitmq:
-    host: localhost
-    port: 5672
-    username: dac
-    password: dac
 
   mail:
     host: smtp.gmail.com
@@ -33,6 +20,17 @@ spring:
           connectiontimeout: 50000
           timeout: 50000
           writetimeout: 50000
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    exchange: ticketExchange
+    queues:
+      email-notification: email-notification-request-queue
+    routing-keys:
+      send-email: email-notification-request
 
 logging:
   level:

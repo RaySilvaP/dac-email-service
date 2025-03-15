@@ -1,6 +1,7 @@
 package com.example.emailService.messaging;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
-public record PurchaseConfirmationEvent(String emailAddress, String userName, String eventName, String ticketType, Integer quantity, double totalPrice) implements Serializable {
+public record PurchaseConfirmationEvent(String emailAddress, String userName, BigDecimal totalPrice) implements Serializable {
 }
