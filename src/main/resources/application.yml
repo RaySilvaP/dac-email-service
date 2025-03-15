@@ -8,8 +8,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: 'aksdaksda'
-    password: 'dsfsdfsdf'
+    username: 'warlla.kelly1@gmail.com'
+    password: 'aqof aglu wggh quxq'
     protocol: smtp
     properties:
       mail:
@@ -31,6 +31,12 @@ spring:
       email-notification: email-notification-request-queue
     routing-keys:
       send-email: email-notification-request
+    deserialization:
+      trust:
+        patterns:
+          - "com.example.etapa1DAC.**"
+          - "com.example.emailService.**"
+          - "java.util.HashSet"
 
 logging:
   level:

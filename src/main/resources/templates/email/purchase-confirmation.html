@@ -2,18 +2,32 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <title>Confirmação de Compra</title>
 </head>
 <body>
 <h1>Olá, <span th:text="${userName}"></span>!</h1>
-<p>Seu ingresso para o evento <strong th:text="${event.name}"></strong> foi confirmado.</p>
+<p>Seu pedido para o evento <strong th:text="${eventName}"></strong> foi confirmado.</p>
 
-<div>
-    <p>Detalhes:</p>
-    <ul>
-        <li>Tipo: <span th:text="${ticketType}"></span></li>
-        <li>Quantidade: <span th:text="${quantity}"></span></li>
-        <li>Total: R$ <span th:text="${#numbers.formatDecimal(totalPrice, 1, 2)}"></span></li>
-    </ul>
-</div>
+<h3>Detalhes da Compra:</h3>
+<table>
+    <thead>
+    <tr>
+        <th>Tipo do Ingresso</th>
+        <th>Quantidade</th>
+        <th>Preço</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="ticket : ${tickets}">
+        <td th:text="${ticket.ticketType}"></td>
+        <td th:text="${ticket.quantity}"></td>
+        <td>R$ <span th:text="${#numbers.formatDecimal(ticket.price, 1, 2)}"></span></td>
+    </tr>
+    </tbody>
+</table>
+
+<p><strong>Total Pago:</strong> R$ <span th:text="${#numbers.formatDecimal(totalPrice, 1, 2)}"></span></p>
+
+<p>Obrigado pela sua compra!</p>
 </body>
 </html>
