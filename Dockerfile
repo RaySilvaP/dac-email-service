@@ -1,14 +1,26 @@
-# Usar a imagem base do OpenJDK 17
-FROM openjdk:17-jdk-alpine
+# Use an official JDK base image for building
+FROM amazoncorretto:17-alpine3.16-jdk AS build
 
-# Diretório de trabalho dentro do container
+# Set working directory
 WORKDIR /app
 
-# Copiar o arquivo JAR gerado para o container
-COPY /target/*.jar /app/app.jar
+# Copy the Maven/Gradle build files and application source code
+COPY . .
 
-# Expor a porta usada pela aplicação
-EXPOSE 8080
+# Build the application (using Maven or Gradle)
+RUN ./mvnw clean package -DskipTests
 
-# Comando para executar a aplicação
-CMD ["java", "-jar", "/app/app.jar"]
+# Use a minimal JDK runtime for the final image
+FROM amazoncorretto:17-alpine3.16-jdk
+
+# Set working directory
+WORKDIR /app
+
+# Copy the built JAR from the previous stage
+COPY --from=build /app/target/*.jar app.jar
+
+# Expose the application port
+EXPOSE 8081
+
+# Run the application
+ENTRYPOINT ["java", "-jar", "app.jar"]
