@@ -11,7 +11,7 @@ public class EmailRequestConsumer {
     @Autowired
     EmailService emailService;
 
-    @RabbitListener(queues = "email-notification-request-queue")
+    @RabbitListener(queues = "emailNotificationQueue")
     public void processPurchaseConfirmation(PurchaseConfirmationEvent event){
         emailService.sendPurchaseConfirmation(event);
     }
